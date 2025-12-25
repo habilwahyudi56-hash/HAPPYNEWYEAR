@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HAPPY NEW YEAR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Fredoka:wght@400;600&family=Poppins:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        /* --- GLOBAL & TRANSITIONS --- */
+        body {
+            margin: 0;
+            overflow: hidden;
+            /* Mencegah scroll saat game */
+            transition: background 0.8s ease, color 0.8s ease;
+            font-family: 'Poppins', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            /* Hilangkan highlight biru di HP */
+        }
+
+        /* Mode Gelap (Intro & Finale) */
+        body.dark-mode {
+            background: #0a0a0a;
+            color: white;
+        }
+
+        /* Mode Terang (Games) - Pastel Gradient */
+        body.light-mode {
+            background: linear-gradient(135deg, #fff1eb 0%, #ace0f9 100%);
+            color: #1f2937;
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .scene {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+            z-index: 10;
+            padding: 20px;
+            /* Padding aman untuk HP */
+        }
+
+        .scene.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* --- COMPONENTS --- */
+
+        /* Game 1: Balloons */
+        .balloon {
+            position: absolute;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: transform 0.1s;
+            user-select: none;
+            border-radius: 50%;
+            animation: float 3s ease-in-out infinite alternate;
+            z-index: 20;
+        }
+
+        @keyframes float {
+            from {
+                transform: translateY(0);
+            }
+
+            to {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Game 3: Gift Box */
+        .gift-box {
+            font-size: 80px;
+            /* HP */
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.1s;
+        }
+
+        @media (min-width: 768px) {
+            .gift-box {
+                font-size: 120px;
+            }
+        }
+
+        /* Laptop lebih besar */
+
+        .shake {
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0% {
+                transform: translate(1px, 1px) rotate(0deg);
+            }
+
+            50% {
+                transform: translate(-2px, 2px) rotate(-2deg);
+            }
+
+            100% {
+                transform: translate(1px, -2px) rotate(-1deg);
+            }
+        }
+
+        /* Finale: Polaroid */
+        .polaroid {
+            background: white;
+            padding: 10px 10px 30px 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            transform: rotate(-3deg) scale(0);
+            opacity: 0;
+            transition: all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            max-width: 80%;
+            /* Agar tidak terlalu lebar di HP */
+            width: 280px;
+        }
+
+        .polaroid.show {
+            transform: rotate(-3deg) scale(1);
+            opacity: 1;
+        }
+
+        .romantic-font {
+            font-family: 'Dancing Script', cursive;
+        }
+
+        /* Canvas Fireworks */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Fix Tombol Lari */
+        #btn-run {
+            /* Pastikan tombol terlihat dan di atas elemen lain */
+            z-index: 50;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+
+<body class="dark-mode">
+
+    <!-- AUDIO (Autoplay blocked by browsers, needs interaction) -->
+    <audio id="bgMusic" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    </audio>
+
+    <canvas id="fireworksCanvas"></canvas>
+
+    <!-- === SCENE 1: INTRO === -->
+    <div id="scene-intro" class="scene active">
+        <div class="text-center">
+            <h1
+                class="text-4xl md:text-7xl font-bold mb-6 text-pink-500 tracking-widest uppercase animate-pulse drop-shadow-lg">
+                Untuk Kamu ❤️
+            </h1>
+            <p class="text-gray-400 mb-10 text-sm md:text-lg px-4">
+                Ada misi kecil sebelum tahun 2026...
+            </p>
+            <button onclick="startJourney()"
+                class="relative inline-flex items-center justify-center px-8 py-4 overflow-hidden font-bold text-white transition-all duration-200 bg-pink-600 font-lg rounded-full hover:bg-pink-500 focus:outline-none ring-offset-2 focus:ring-2 ring-pink-400 shadow-lg shadow-pink-500/50">
+                Buka Tantangan
+            </button>
+        </div>
+    </div>
+
+    <!-- === SCENE 2: GAME 1 (BALLOONS) === -->
+    <div id="scene-game1" class="scene">
+        <div class="absolute top-8 w-full text-center z-20 pointer-events-none">
+            <h2 class="text-2xl md:text-3xl font-bold text-blue-600 drop-shadow-sm">
+                Misi 1: Hapus "Bad Mood" 😠
+            </h2>
+            <p class="text-sm text-gray-500 mt-1">Klik semua balon yang bikin kamu bad mood</p>
+        </div>
+        <div id="balloon-container" class="w-full h-full absolute inset-0 overflow-hidden"></div>
+    </div>
+
+    <!-- === SCENE 3: GAME 2 (PRANK BUTTON) === -->
+    <div id="scene-game2" class="scene bg-yellow-50">
+        <div class="text-center w-full max-w-md mx-auto relative h-full flex flex-col justify-center">
+            <div class="text-6xl mb-4 bounce">🤔</div>
+            <h2 class="text-2xl md:text-4xl font-bold text-gray-800 mb-4">Ujian Kejujuran</h2>
+            <p class="text-lg mb-12 font-medium text-gray-600">Kamu sayang gak sama aku?</p>
+
+            <!-- Container Tombol Relatif -->
+            <!-- flex-wrap biar aman di layar sangat kecil -->
+            <div class="w-full flex flex-wrap justify-center items-center gap-4 relative z-10 p-4">
+
+                <!-- Tombol YES (Diam) -->
+                <button onclick="nextGame('scene-game2', 'scene-game3')"
+                    class="bg-green-500 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-green-600 active:scale-95 transition">
+                    Sayang Banget! 😍
+                </button>
+
+                <!-- Tombol NO (Lari) -->
+                <!-- TIDAK ADA class 'absolute' disini, jadi dia akan muncul di sebelah/bawah tombol Yes -->
+                <button id="btn-run"
+                    class="bg-red-500 text-white px-8 py-3 rounded-xl font-bold shadow-lg transition-all duration-100 ease-out">
+                    Gak Dulu wleeee 😜
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- === SCENE 4: GAME 3 (GIFT BOX) === -->
+    <div id="scene-game3" class="scene bg-purple-50">
+        <h2 class="text-2xl md:text-3xl font-bold text-purple-600 mb-2 text-center">
+            Misi Terakhir!
+        </h2>
+        <p class="text-gray-500 mb-10 text-center">Tap kadonya yang cepet sampai hp kamu meledak! 🎁</p>
+
+        <div id="gift-box" onclick="tapGift()" class="gift-box mb-8">🎁</div>
+
+        <!-- Progress Bar -->
+        <div class="w-64 md:w-96 h-4 bg-gray-200 rounded-full overflow-hidden border border-gray-300">
+            <div id="gift-progress"
+                class="h-full bg-gradient-to-r from-purple-400 to-pink-500 w-0 transition-all duration-100"></div>
+        </div>
+        <p class="mt-2 text-xs text-gray-400">Keep tapping!</p>
+    </div>
+
+    <!-- === SCENE 5: STORYTELLING === -->
+    <div id="scene-story" class="scene">
+        <div class="flex flex-col items-center justify-center h-full w-full max-w-2xl mx-auto px-6 text-center">
+            <div id="story-text-display"
+                class="text-xl md:text-3xl leading-relaxed text-gray-100 font-medium mb-12 min-h-[100px] flex items-center justify-center">
+                <!-- Teks muncul disini -->
+            </div>
+
+            <button onclick="nextStory()" id="btn-story-next"
+                class="border border-white/30 bg-white/10 text-white px-8 py-2 rounded-full hover:bg-white/20 transition backdrop-blur-sm text-sm tracking-widest uppercase">
+                Lanjut
+            </button>
+        </div>
+    </div>
+
+    <!-- === SCENE 6: FINALE === -->
+    <div id="scene-finale" class="scene">
+        <div class="flex flex-col items-center z-20 relative w-full px-4">
+
+            <!-- FOTO POLAROID -->
+            <div id="final-photo" class="polaroid bg-white transform rotate-2 mx-auto">
+                <!-- !!! GANTI FOTO DISINI !!! -->
+                <div class="aspect-[3/4] overflow-hidden bg-gray-100 w-full relative">
+                    <img src="FTBR.jpg" alt="Kita" class="object-cover w-full h-full filter contrast-110">
+                </div>
+                <div class="text-center mt-4 pb-2">
+                    <p class="romantic-font text-2xl md:text-3xl text-gray-800 font-bold">I LOVE YOU</p>
+                </div>
+            </div>
+
+            <!-- Teks Akhir -->
+            <h1
+                class="text-5xl md:text-7xl text-pink-500 romantic-font mt-8 mb-4 drop-shadow-[0_0_15px_rgba(236,72,153,0.8)] text-center">
+                Happy New Year!
+            </h1>
+            <p class="text-gray-300 tracking-[0.3em] text-xs md:text-sm uppercase text-center">
+                Welcome 2026
+            </p>
+
+            <button onclick="location.reload()" class="mt-16 text-gray-600 text-xs hover:text-white transition">
+                Putar Ulang
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA (Silakan Edit Bagian Ini) ---
+        const stories = [
+            "Yey! Selamat kamu berhasil nyelesain misinya! 🎉",
+            "Tahun 2025 nggak kerasa sudah kita lalui, waktu demi waktu kita jalani",
+            "Meskipun kita jarang untuk bersama, tapi di sinilah letak serunya",
+            "Jujur, aku pengen banget bisa ketemu kamu setiap hari",
+            "karna buatku, kamu tempat untuk ku pulang, satu satu nya tempat untuk menghilangkan semua beban pikiran",
+            "aku berharap di tahun 2026 esok, kita masih bersama",
+            "I Love You, Sayangku ❤️"
+        ];
+
+        const badWords = ["Sedih", "Galau", "Marah", "Kecewa", "Insecure", "Overthink",];
+        const balloonColors = ["#ef4444", "#f97316", "#8b5cf6", "#3b82f6", "#ec4899"];
+
+        // --- SYSTEM ---
+        const audio = document.getElementById('bgMusic');
+        let currentStoryIndex = 0;
+
+        function setMode(mode) {
+            if (mode === 'light') {
+                document.body.className = 'light-mode';
+            } else {
+                document.body.className = 'dark-mode';
+            }
+        }
+
+        function switchScene(hideId, showId) {
+            const hideEl = document.getElementById(hideId);
+            const showEl = document.getElementById(showId);
+
+            hideEl.classList.remove('active');
+            setTimeout(() => {
+                hideEl.classList.add('hidden');
+                showEl.classList.remove('hidden');
+                setTimeout(() => showEl.classList.add('active'), 50);
+            }, 500);
+        }
+
+        function startJourney() {
+            audio.volume = 0.5;
+            audio.play().catch(e => console.log("Audio play failed (interaction needed)"));
+
+            setMode('light');
+            switchScene('scene-intro', 'scene-game1');
+            initBalloonGame();
+        }
+
+        // --- GAME 1: BALLOONS ---
+        function initBalloonGame() {
+            const container = document.getElementById('balloon-container');
+            container.innerHTML = ''; // Reset jika restart
+            let popped = 0;
+            const total = 10;
+
+            // Menggunakan dimensi container untuk akurasi di mobile
+            const width = container.offsetWidth || window.innerWidth;
+            const height = container.offsetHeight || window.innerHeight;
+
+            for (let i = 0; i < total; i++) {
+                const el = document.createElement('div');
+                el.className = 'balloon';
+
+                // Responsive Size: Lebih kecil di Mobile
+                const isMobile = width < 600;
+                const minSize = isMobile ? 45 : 60; // Minimal size
+                const varSize = isMobile ? 25 : 30; // Variasi size
+                const size = Math.random() * varSize + minSize;
+
+                el.style.width = size + 'px';
+                el.style.height = size + 'px';
+                el.style.backgroundColor = balloonColors[Math.floor(Math.random() * balloonColors.length)];
+
+                // --- SAFE ZONE CALCULATION (PERBAIKAN UTAMA) ---
+                // Padding dari tepi layar agar tidak kepotong (20px)
+                const padding = 20;
+
+                // Tinggi Header (Judul): Hindari area atas (sekitar 140px di mobile)
+                const headerHeight = isMobile ? 140 : 100;
+
+                // Batas Maksimal Kiri dan Atas
+                const maxLeft = width - size - padding;
+                const maxTop = height - size - padding;
+
+                // Batas Minimal Atas (Biar ga kena judul)
+                const minTop = headerHeight;
+
+                // Random position dalam safe zone
+                const leftPos = Math.random() * (maxLeft - padding) + padding;
+
+                // Pastikan top minimal di bawah header
+                let topPos = Math.random() * (maxTop - minTop) + minTop;
+
+                // Safety check jika layar sangat pendek
+                if (topPos < minTop) topPos = minTop;
+                if (topPos > maxTop) topPos = maxTop;
+
+                el.style.left = leftPos + 'px';
+                el.style.top = topPos + 'px';
+
+                el.innerText = badWords[Math.floor(Math.random() * badWords.length)];
+                el.style.fontSize = (isMobile ? '10px' : '12px');
+
+                const pop = (e) => {
+                    e.preventDefault();
+                    el.style.transform = 'scale(1.5)';
+                    el.style.opacity = '0';
+                    setTimeout(() => el.remove(), 200);
+                    popped++;
+                    if (popped === total) setTimeout(() => nextGame('scene-game1', 'scene-game2'), 500);
+                };
+
+                el.addEventListener('touchstart', pop);
+                el.addEventListener('click', pop);
+
+                container.appendChild(el);
+            }
+        }
+
+        function nextGame(current, next) {
+            switchScene(current, next);
+            if (next === 'scene-game2') initRunawayButton();
+        }
+
+        // --- GAME 2: RUNAWAY BUTTON (Fix) ---
+        function initRunawayButton() {
+            const btn = document.getElementById('btn-run');
+
+            const moveBtn = (e) => {
+                if (e.type === 'touchstart') e.preventDefault();
+
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                const btnRect = btn.getBoundingClientRect();
+
+                // Kalkulasi posisi random baru (Padding 30px dari tepi)
+                const padding = 30;
+                const newX = Math.random() * (viewportWidth - btnRect.width - (padding * 2)) + padding;
+                const newY = Math.random() * (viewportHeight - btnRect.height - (padding * 2)) + padding;
+
+                // Ubah ke fixed position agar bisa lari kemana saja
+                btn.style.position = 'fixed';
+                btn.style.left = newX + 'px';
+                btn.style.top = newY + 'px';
+                btn.style.zIndex = '100'; // Selalu paling atas
+            };
+
+            // Event Listeners
+            btn.addEventListener('mouseover', moveBtn);
+            btn.addEventListener('touchstart', moveBtn);
+            btn.addEventListener('click', moveBtn);
+        }
+
+        // --- GAME 3: GIFT BOX ---
+        let taps = 0;
+        const maxTaps = 20;
+
+        function tapGift() {
+            taps++;
+            const box = document.getElementById('gift-box');
+            const progress = document.getElementById('gift-progress');
+
+            progress.style.width = (taps / maxTaps) * 100 + '%';
+
+            box.classList.remove('shake');
+            void box.offsetWidth;
+            box.classList.add('shake');
+
+            let scale = 1 + (taps * 0.05);
+            box.style.transform = `scale(${scale})`;
+
+            if (taps >= maxTaps) {
+                setMode('dark');
+                switchScene('scene-game3', 'scene-story');
+                loadStory();
+            }
+        }
+
+        // --- STORY LOGIC ---
+        function loadStory() {
+            const display = document.getElementById('story-text-display');
+            const btn = document.getElementById('btn-story-next');
+
+            display.style.opacity = 0;
+            display.style.transform = 'translateY(10px)';
+
+            setTimeout(() => {
+                display.innerText = stories[currentStoryIndex];
+                display.style.transition = 'all 0.5s ease';
+                display.style.opacity = 1;
+                display.style.transform = 'translateY(0)';
+            }, 200);
+
+            if (currentStoryIndex === stories.length - 1) {
+                btn.innerText = "SIAP! ❤️";
+                btn.classList.add('bg-pink-600', 'border-none');
+            }
+        }
+
+        function nextStory() {
+            currentStoryIndex++;
+            if (currentStoryIndex < stories.length) {
+                loadStory();
+            } else {
+                startFinale();
+            }
+        }
+
+        // --- FINALE ---
+        function startFinale() {
+            switchScene('scene-story', 'scene-finale');
+
+            setTimeout(() => {
+                document.getElementById('final-photo').classList.add('show');
+            }, 500);
+
+            startFireworks();
+        }
+
+        // --- FIREWORKS ENGINE ---
+        const canvas = document.getElementById('fireworksCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = Math.random() * 4 + 1;
+                this.vx = Math.cos(angle) * velocity;
+                this.vy = Math.sin(angle) * velocity;
+                this.life = 1;
+                this.decay = Math.random() * 0.015 + 0.01;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += 0.05;
+                this.vx *= 0.95;
+                this.life -= this.decay;
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.life;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function launchFirework() {
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * (canvas.height * 0.6);
+            const colors = ['#ff006e', '#fb5607', '#ffbe0b', '#3a86ff', '#8338ec'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+
+            for (let i = 0; i < 30; i++) {
+                particles.push(new Particle(x, y, color));
+            }
+        }
+
+        function animateFireworks() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (Math.random() < 0.05) launchFirework();
+
+            particles.forEach((p, index) => {
+                p.update();
+                p.draw();
+                if (p.life <= 0) particles.splice(index, 1);
+            });
+
+            if (document.body.classList.contains('dark-mode')) {
+                requestAnimationFrame(animateFireworks);
+            }
+        }
+
+        function startFireworks() {
+            animateFireworks();
+            for (let i = 0; i < 5; i++) {
+                setTimeout(launchFirework, i * 300);
+            }
+        }
+    </script>
+</body>
+
+</html>
